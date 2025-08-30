@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|solutionrelative:CameraLaunch\\pluginMain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "pluginMain.cpp",
+              "DocumentMoniker": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp",
+              "RelativeDocumentMoniker": "CameraLaunch\\pluginMain.cpp",
+              "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp",
+              "RelativeToolTip": "CameraLaunch\\pluginMain.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-08-30T06:19:14.943Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
