@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|solutionrelative:CameraLaunch\\CameraLaunchCmd.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|solutionrelative:CameraLaunch\\CameraLaunchCmd.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{225CA011-A4A9-4198-B31A-9ABCE16571D1}|CameraLaunch\\CameraLaunch.vcxproj|solutionrelative:CameraLaunch\\pluginMain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
@@ -19,15 +27,39 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "CameraLaunchCmd.cpp",
+              "DocumentMoniker": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.cpp",
+              "RelativeDocumentMoniker": "CameraLaunch\\CameraLaunchCmd.cpp",
+              "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.cpp",
+              "RelativeToolTip": "CameraLaunch\\CameraLaunchCmd.cpp",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAD0AAAAXAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-09-02T01:54:00.253Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CameraLaunchCmd.h",
+              "DocumentMoniker": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.h",
+              "RelativeDocumentMoniker": "CameraLaunch\\CameraLaunchCmd.h",
+              "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.h",
+              "RelativeToolTip": "CameraLaunch\\CameraLaunchCmd.h",
+              "ViewState": "AQIAABUAAAAAAAAAAAAAAC4AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-09-02T01:39:06.002Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "pluginMain.cpp",
               "DocumentMoniker": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp",
               "RelativeDocumentMoniker": "CameraLaunch\\pluginMain.cpp",
               "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp",
               "RelativeToolTip": "CameraLaunch\\pluginMain.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAAAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABMAAAAnAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-08-30T06:19:14.943Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-30T06:19:14.943Z"
             }
           ]
         }
