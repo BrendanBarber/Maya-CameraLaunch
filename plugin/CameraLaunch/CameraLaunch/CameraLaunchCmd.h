@@ -12,6 +12,13 @@
 #include <maya/MDagPath.h>
 #include <maya/MSelectionList.h>
 #include <maya/MTime.h>
+#include <maya/MFnTransform.h>
+#include <maya/MPlug.h>
+#include <maya/MFnAnimCurve.h>
+#include <maya/M3dView.h>
+#include <maya/MMatrix.h>
+#include <maya/MFnDependencyNode.h>
+#include <maya/MPlugArray.h>
 
 class CameraLaunchCmd : public MPxCommand
 {
@@ -51,7 +58,7 @@ private:
 	std::vector<MVector> calculateTrajectory();
 	MStatus setKeyframesOnCamera(const std::vector<MVector>& points);
 	int calculateFlightFrames();
-
+	std::vector<int> getKeyFrameNumbers();
 
 	MStatus parseArguments(const MArgList& args);
 	MStatus executeCommand();

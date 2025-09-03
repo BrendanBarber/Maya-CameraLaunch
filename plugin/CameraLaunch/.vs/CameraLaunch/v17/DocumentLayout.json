@@ -32,7 +32,7 @@
               "RelativeDocumentMoniker": "CameraLaunch\\CameraLaunchCmd.cpp",
               "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.cpp",
               "RelativeToolTip": "CameraLaunch\\CameraLaunchCmd.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAD0AAAAXAAAA",
+              "ViewState": "AQIAAAkBAAAAAAAAAAAAwBgBAAACAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-09-02T01:54:00.253Z",
               "EditorCaption": ""
@@ -45,9 +45,10 @@
               "RelativeDocumentMoniker": "CameraLaunch\\CameraLaunchCmd.h",
               "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.h",
               "RelativeToolTip": "CameraLaunch\\CameraLaunchCmd.h",
-              "ViewState": "AQIAABUAAAAAAAAAAAAAAC4AAAAAAAAA",
+              "ViewState": "AQIAABsAAAAAAAAAAAAAADwAAAAnAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-09-02T01:39:06.002Z"
+              "WhenOpened": "2025-09-02T01:39:06.002Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -57,9 +58,10 @@
               "RelativeDocumentMoniker": "CameraLaunch\\pluginMain.cpp",
               "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\pluginMain.cpp",
               "RelativeToolTip": "CameraLaunch\\pluginMain.cpp",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABMAAAAnAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAABuAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-08-30T06:19:14.943Z"
+              "WhenOpened": "2025-08-30T06:19:14.943Z",
+              "EditorCaption": ""
             }
           ]
         }
