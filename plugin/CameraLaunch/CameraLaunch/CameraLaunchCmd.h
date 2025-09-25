@@ -20,6 +20,12 @@
 #include <maya/MFnDependencyNode.h>
 #include <maya/MPlugArray.h>
 
+enum class CameraKeyframeType {
+	START,
+	MIDDLE,
+	END
+};
+
 class CameraLaunchCmd : public MPxCommand
 {
 public:
@@ -57,6 +63,15 @@ private:
 
 	std::vector<MVector> calculateTrajectory();
 	MStatus setKeyframesOnCamera(const std::vector<MVector>& points);
+	MStatus setKeyframeOnCamera(const MVector& point, int frameNumber, CameraKeyframeType keyType,
+		const MVector& startPoint, const MVector& middlePoint, const MVector& endPoint,
+		int startFrame, int middleFrame, int endFrame);
+	void setParabolicTangents(MFnAnimCurve& animCurve, unsigned int keyIndex, CameraKeyframeType keyType,
+		const MVector& startPoint, const MVector& middlePoint, const MVector& endPoint,
+		int startFrame, int middleFrame, int endFrame);
+	bool getOrCreateAnimCurve(MPlug& plug, MFnAnimCurve& animCurve, MObject& animCurveObj);
+	MStatus clearExistingAnimationCurves();
+	void clearAnimCurveFromPlug(MPlug& plug);
 	int calculateFlightFrames();
 	std::vector<int> getKeyFrameNumbers();
 
