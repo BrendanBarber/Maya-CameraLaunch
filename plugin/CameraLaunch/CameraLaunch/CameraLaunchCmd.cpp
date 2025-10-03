@@ -146,7 +146,8 @@ MStatus CameraLaunchCmd::executeCommand()
 MStatus CameraLaunchCmd::generateKeyframes()
 {
 	std::vector<MVector> trajectoryPoints = calculateTrajectory();
-	return setKeyframesOnCamera(trajectoryPoints);
+	std::vector<MEulerRotation> trajectoryRots = calculateRotations(trajectoryPoints);
+	return setKeyframesOnCamera(trajectoryPoints, trajectoryRots);
 }
 
 std::vector<MVector> CameraLaunchCmd::calculateTrajectory()
@@ -178,7 +179,31 @@ std::vector<MVector> CameraLaunchCmd::calculateTrajectory()
 	return keyframes;
 }
 
-MStatus CameraLaunchCmd::setKeyframesOnCamera(const std::vector<MVector>& points)
+std::vector<MEulerRotation> CameraLaunchCmd::calculateRotations(const std::vector<MVector> &points)
+{
+	std::vector<MEulerRotation> rotKeyframes;
+
+	MVector normalizeVelocity = m_velocity.normal();
+
+	// Set start rotation to be facing the direction of the input velocity
+	const double PI = atan(1.0) * 4;
+	double yaw = std::atan2(normalizeVelocity.x, normalizeVelocity.z) + PI;
+	double pitch = std::asin(normalizeVelocity.y);
+
+	rotKeyframes.push_back(MEulerRotation(pitch, yaw, 0));
+
+	// Set the middle rotation to be a pitch of zero, facing along the trajectory
+	rotKeyframes.push_back(MEulerRotation(0, yaw, 0));
+
+	// Set the end rotation to be the negation of the input velocity
+	MVector flippedNormalizedVelocity = normalizeVelocity * -1;
+	pitch = std::asin(flippedNormalizedVelocity.y);
+	rotKeyframes.push_back(MEulerRotation(pitch, yaw, 0));
+
+	return rotKeyframes;
+}
+
+MStatus CameraLaunchCmd::setKeyframesOnCamera(const std::vector<MVector>& points, const std::vector<MEulerRotation>& rots)
 {
 	if (points.size() != 3) {
 		MGlobal::displayError("Expected exactly 3 points for parabolic trajectory");
@@ -196,17 +221,17 @@ MStatus CameraLaunchCmd::setKeyframesOnCamera(const std::vector<MVector>& points
 		return status;
 	}
 
-	status = setKeyframeOnCamera(points[0], frameNumbers[0], CameraKeyframeType::START,
+	status = setKeyframeOnCamera(points[0], rots[0], frameNumbers[0], CameraKeyframeType::START,
 		points[0], points[1], points[2],
 		frameNumbers[0], frameNumbers[1], frameNumbers[2]);
 	if (status != MS::kSuccess) return status;
 
-	status = setKeyframeOnCamera(points[1], frameNumbers[1], CameraKeyframeType::MIDDLE,
+	status = setKeyframeOnCamera(points[1], rots[1], frameNumbers[1], CameraKeyframeType::MIDDLE,
 		points[0], points[1], points[2],
 		frameNumbers[0], frameNumbers[1], frameNumbers[2]);
 	if (status != MS::kSuccess) return status;
 
-	status = setKeyframeOnCamera(points[2], frameNumbers[2], CameraKeyframeType::END,
+	status = setKeyframeOnCamera(points[2], rots[2], frameNumbers[2], CameraKeyframeType::END,
 		points[0], points[1], points[2],
 		frameNumbers[0], frameNumbers[1], frameNumbers[2]);
 	if (status != MS::kSuccess) return status;
@@ -217,7 +242,7 @@ MStatus CameraLaunchCmd::setKeyframesOnCamera(const std::vector<MVector>& points
 	return MS::kSuccess;
 }
 
-MStatus CameraLaunchCmd::setKeyframeOnCamera(const MVector& point, int frameNumber, CameraKeyframeType keyType,
+MStatus CameraLaunchCmd::setKeyframeOnCamera(const MVector& point, const MEulerRotation& rot, int frameNumber, CameraKeyframeType keyType,
 	const MVector& startPoint, const MVector& middlePoint, const MVector& endPoint,
 	int startFrame, int middleFrame, int endFrame)
 {
@@ -235,6 +260,9 @@ MStatus CameraLaunchCmd::setKeyframeOnCamera(const MVector& point, int frameNumb
 	MPlug translateYPlug = transformFn.findPlug("translateY", false, &status);
 	MPlug translateZPlug = transformFn.findPlug("translateZ", false, &status);
 
+	MPlug rotationXPlug = transformFn.findPlug("rotateX", false, &status);
+	MPlug rotationYPlug = transformFn.findPlug("rotateY", false, &status);
+
 	if (status != MS::kSuccess) {
 		MGlobal::displayError("Failed to get translate plugs");
 		return status;
@@ -244,6 +272,9 @@ MStatus CameraLaunchCmd::setKeyframeOnCamera(const MVector& point, int frameNumb
 	MFnAnimCurve animCurveX, animCurveY, animCurveZ;
 	MObject animCurveObjX, animCurveObjY, animCurveObjZ;
 
+	MFnAnimCurve animCurveRotX, animCurveRotY;
+	MObject animCurveRotObjX, animCurveRotObjY;
+
 	if (!getOrCreateAnimCurve(translateXPlug, animCurveX, animCurveObjX)) {
 		return MS::kFailure;
 	}
@@ -251,6 +282,12 @@ MStatus CameraLaunchCmd::setKeyframeOnCamera(const MVector& point, int frameNumb
 		return MS::kFailure;
 	}
 	if (!getOrCreateAnimCurve(translateZPlug, animCurveZ, animCurveObjZ)) {
+		return MS::kFailure;
+	}
+	if (!getOrCreateAnimCurve(rotationXPlug, animCurveRotX, animCurveRotObjX)) {
+		return MS::kFailure;
+	}
+	if (!getOrCreateAnimCurve(rotationYPlug, animCurveRotY, animCurveRotObjY)) {
 		return MS::kFailure;
 	}
 
@@ -289,6 +326,24 @@ MStatus CameraLaunchCmd::setKeyframeOnCamera(const MVector& point, int frameNumb
 		NULL, &keyStatus);
 	if (keyStatus != MS::kSuccess) {
 		MGlobal::displayError(MString("Failed to set Z keyframe at frame ") + frameNumber);
+		return keyStatus;
+	}
+
+	unsigned int keyIndexRotX = animCurveRotX.addKey(currentTime, rot.x,
+		MFnAnimCurve::kTangentLinear,
+		MFnAnimCurve::kTangentLinear,
+		NULL, &keyStatus);
+	if (keyStatus != MS::kSuccess) {
+		MGlobal::displayError(MString("Failed to set X rotation keyframe at frame ") + frameNumber);
+		return keyStatus;
+	}
+
+	unsigned int keyIndexRotY = animCurveRotY.addKey(currentTime, rot.y,
+		MFnAnimCurve::kTangentLinear,
+		MFnAnimCurve::kTangentLinear,
+		NULL, &keyStatus);
+	if (keyStatus != MS::kSuccess) {
+		MGlobal::displayError(MString("Failed to set Y rotation keyframe at frame ") + frameNumber);
 		return keyStatus;
 	}
 

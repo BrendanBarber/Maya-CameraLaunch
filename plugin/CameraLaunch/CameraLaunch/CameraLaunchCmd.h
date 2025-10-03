@@ -62,8 +62,9 @@ private:
 	MSelectionList m_originalSelection;
 
 	std::vector<MVector> calculateTrajectory();
-	MStatus setKeyframesOnCamera(const std::vector<MVector>& points);
-	MStatus setKeyframeOnCamera(const MVector& point, int frameNumber, CameraKeyframeType keyType,
+	std::vector<MEulerRotation> calculateRotations(const std::vector<MVector>& points);
+	MStatus setKeyframesOnCamera(const std::vector<MVector>& points, const std::vector<MEulerRotation>& rots);
+	MStatus setKeyframeOnCamera(const MVector& point, const MEulerRotation& rot, int frameNumber, CameraKeyframeType keyType,
 		const MVector& startPoint, const MVector& middlePoint, const MVector& endPoint,
 		int startFrame, int middleFrame, int endFrame);
 	void setParabolicTangents(MFnAnimCurve& animCurve, unsigned int keyIndex, CameraKeyframeType keyType,
