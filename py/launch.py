@@ -1,23 +1,4 @@
 import maya.cmds as cmds
-import maya.mel as mel
-
-class CameraLaunchShelf:
-
-    def __init__(self, name="CameraLaunch"):
-        self.name = name
-        self.label_background = (0, 0, 0, 0)
-        self.label_color = (0.9, 0.9, 0.9)
-
-        self._cleanOldShelf()
-        cmds.setParent(self.name)
-        self.build()
-
-    def build(self):
-        self.addButton(
-            label="Launch",
-            icon="camera.png",
-            command="""
-import maya.cmds as cmds
 from PySide6 import QtWidgets, QtCore
 
 
@@ -137,7 +118,7 @@ class SimpleButtonUI(QtWidgets.QDialog):
             )
             print(f"Camera launched: {camera} with velocity {velocity}")
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Error", f'Failed to launch camera: {str(e)}')
+            QtWidgets.QMessageBox.critical(self, "Error", f"Failed to launch camera:\n{str(e)}")
 
 
 def show_ui():
@@ -154,30 +135,3 @@ def show_ui():
 
 
 show_ui()
-
-            """
-        )
-
-    def addButton(self, label, icon="commandButton.png", command="", double_command=""):
-        cmds.setParent(self.name)
-
-        cmds.shelfButton(
-            width=37,
-            height=37,
-            image=icon,
-            label=label,
-            command=command,
-            doubleClickCommand=double_command,
-            annotation=f"",
-            sourceType="python"
-        )
-
-    def _cleanOldShelf(self):
-        if cmds.shelfLayout(self.name, exists=True):
-            if cmds.shelfLayout(self.name, query=True, childArray=True):
-                for e in cmds.shelfLayout(self.name, query=True, childArray=True):
-                    cmds.deleteUI(e)
-        else:
-            cmds.shelfLayout(self.name, parent="ShelfLayout")
-
-CameraLaunchShelf()
