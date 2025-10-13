@@ -63,11 +63,79 @@ MStatus CameraLaunchCmd::undoIt()
 		return MS::kFailure;
 	}
 
-	// Restore keyframes
-	//
+	MStatus status;
+
+	// Clear created curves
+	status = clearExistingAnimationCurves();
+	if (status != MS::kSuccess) {
+		MGlobal::displayWarning("Failed to clear animation curves during undo");
+	}
+
+	// Get camera transform
+	MObject cameraTransform = m_cameraPath.transform(&status);
+	if (status != MS::kSuccess) return status;
+
+	MFnTransform transformFn(cameraTransform);
+
+	// Get the plugs we need to restore
+	std::vector<MPlug> plugsToRestore = {
+		transformFn.findPlug("translateX", false),
+		transformFn.findPlug("translateY", false),
+		transformFn.findPlug("translateZ", false),
+		transformFn.findPlug("rotateX", false),
+		transformFn.findPlug("rotateY", false)
+	};
+
+	// Restore animation curves
+	for (unsigned int i = 0; i < m_savedAnimCurves.keyTimes.size(); ++i) {
+		if (i >= plugsToRestore.size()) break;
+
+		MPlug& plug = plugsToRestore[i];
+
+		// Skip if no keys were saved for this curve
+		if (m_savedAnimCurves.keyTimes[i].length() == 0) {
+			continue;
+		}
+
+		// Create new animation curve
+		MFnAnimCurve animCurve;
+		MObject animCurveObj = animCurve.create(plug, NULL, &status);
+		if (status != MS::kSuccess) {
+			MGlobal::displayWarning("Failed to recreate animation curve during undo");
+			continue;
+		}
+
+		// Restore saved keyframes
+		const MTimeArray& times = m_savedAnimCurves.keyTimes[i];
+		const MDoubleArray& values = m_savedAnimCurves.keyValues[i];
+		const std::vector<MFnAnimCurve::TangentType>& inTangentTypes = m_savedAnimCurves.inTangentTypes[i];
+		const std::vector<MFnAnimCurve::TangentType>& outTangentTypes = m_savedAnimCurves.outTangentTypes[i];
+		const MDoubleArray& inTangentAngles = m_savedAnimCurves.inTangentAngles[i];
+		const MDoubleArray& outTangentAngles = m_savedAnimCurves.outTangentAngles[i];
+		const MDoubleArray& inTangentWeights = m_savedAnimCurves.inTangentWeights[i];
+		const MDoubleArray& outTangentWeights = m_savedAnimCurves.outTangentWeights[i];
+
+		for (unsigned int k = 0; k < times.length(); ++k) {
+			// Add the key
+			unsigned int keyIndex = animCurve.addKey(times[k], values[k]);
+
+			// Restore tangent types
+			animCurve.setInTangentType(keyIndex, inTangentTypes[k]);
+			animCurve.setOutTangentType(keyIndex, outTangentTypes[k]);
+
+			// Restore tangent angles and weights
+			MAngle inAngle(inTangentAngles[k], MAngle::kRadians);
+			MAngle outAngle(outTangentAngles[k], MAngle::kRadians);
+
+			animCurve.setTangent(keyIndex, inAngle, inTangentWeights[k], true);
+			animCurve.setTangent(keyIndex, outAngle, outTangentWeights[k], false);
+		}
+	}
 
 	// Restore selection
 	MGlobal::setActiveSelectionList(m_originalSelection);
+
+	M3dView::active3dView().refresh();
 
 	return MS::kSuccess;
 }
@@ -126,14 +194,26 @@ MStatus CameraLaunchCmd::parseArguments(const MArgList& args)
 
 MStatus CameraLaunchCmd::executeCommand()
 {
+	// Save animation state
+	MStatus saveStatus = saveAnimationState();
+	if (!saveStatus) {
+		MGlobal::displayWarning("Failed to save animation state");
+	}
+
+	// Store current selection
+	MGlobal::getActiveSelectionList(m_originalSelection);
+
+	// Clear existing keyframes
+	MStatus clearStatus = clearExistingAnimationCurves();
+	if (!clearStatus) {
+		MGlobal::displayWarning("Failed to clear existing animation curves");
+	}
+
 	// Generate keyframes
 	MStatus keyframeStatus = generateKeyframes();
 	if (!keyframeStatus) {
 		return keyframeStatus;
 	}
-
-	// Store current selection
-	MGlobal::getActiveSelectionList(m_originalSelection);
 
 	// Clear selection and select camera that was launched
 	MSelectionList newSel;
@@ -216,10 +296,7 @@ MStatus CameraLaunchCmd::setKeyframesOnCamera(const std::vector<MVector>& points
 		return MS::kFailure;
 	}
 
-	MStatus status = clearExistingAnimationCurves();
-	if (status != MS::kSuccess) {
-		return status;
-	}
+	MStatus status;
 
 	status = setKeyframeOnCamera(points[0], rots[0], frameNumbers[0], CameraKeyframeType::START,
 		points[0], points[1], points[2],
@@ -447,9 +524,20 @@ MStatus CameraLaunchCmd::clearExistingAnimationCurves()
 		return status;
 	}
 
+	MPlug rotationXPlug = transformFn.findPlug("rotateX", false, &status);
+	MPlug rotationYPlug = transformFn.findPlug("rotateY", false, &status);
+
+	if (status != MS::kSuccess) {
+		MGlobal::displayError("Failed to get rotation plugs");
+		return status;
+	}
+
 	clearAnimCurveFromPlug(translateXPlug);
 	clearAnimCurveFromPlug(translateYPlug);
 	clearAnimCurveFromPlug(translateZPlug);
+
+	clearAnimCurveFromPlug(rotationXPlug);
+	clearAnimCurveFromPlug(rotationYPlug);
 
 	return MS::kSuccess;
 }
@@ -466,6 +554,81 @@ void CameraLaunchCmd::clearAnimCurveFromPlug(MPlug& plug)
 			}
 		}
 	}
+}
+
+MStatus CameraLaunchCmd::saveAnimationState() {
+	MStatus status;
+	MObject cameraTransform = m_cameraPath.transform(&status);
+	if (status != MS::kSuccess) return status;
+
+	MFnTransform transformFn(cameraTransform);
+
+	std::vector<MPlug> plugsToSave = {
+		transformFn.findPlug("translateX", false),
+		transformFn.findPlug("translateY", false),
+		transformFn.findPlug("translateZ", false),
+		transformFn.findPlug("rotateX", false),
+		transformFn.findPlug("rotateY", false)
+	};
+
+	for (MPlug& plug : plugsToSave) {
+		if (plug.isConnected()) {
+			MPlugArray connections;
+			plug.connectedTo(connections, true, false);
+
+			for (unsigned int i = 0; i < connections.length(); ++i) {
+				MObject connectedNode = connections[i].node();
+				if (connectedNode.hasFn(MFn::kAnimCurve)) {
+					MFnAnimCurve animCurve(connectedNode);
+					
+					m_savedAnimCurves.animCurveObjects.append(connectedNode);
+
+					MTimeArray times;
+					MDoubleArray values;
+					std::vector<MFnAnimCurve::TangentType> inTangentTypes;
+					std::vector<MFnAnimCurve::TangentType> outTangentTypes;
+					MDoubleArray inTangentAngles;
+					MDoubleArray outTangentAngles;
+					MDoubleArray inTangentWeights;
+					MDoubleArray outTangentWeights;
+
+					unsigned int numKeys = animCurve.numKeys();
+					for (unsigned int k = 0; k < numKeys; ++k) {
+						// Key times and values
+						times.append(animCurve.time(k));
+						values.append(animCurve.value(k));
+
+						// Tangent Types
+						inTangentTypes.push_back(animCurve.inTangentType(k));
+						outTangentTypes.push_back(animCurve.outTangentType(k));
+
+						// Tangent angles/weights
+						MAngle inAngle, outAngle;
+						double inWeight, outWeight;
+
+						animCurve.getTangent(k, inAngle, inWeight, true);
+						animCurve.getTangent(k, outAngle, outWeight, false);
+
+						inTangentAngles.append(inAngle.asRadians());
+						outTangentAngles.append(outAngle.asRadians());
+						inTangentWeights.append(inWeight);
+						outTangentWeights.append(outWeight);
+					}
+
+					m_savedAnimCurves.keyTimes.push_back(times);
+					m_savedAnimCurves.keyValues.push_back(values);
+					m_savedAnimCurves.inTangentTypes.push_back(inTangentTypes);
+					m_savedAnimCurves.outTangentTypes.push_back(outTangentTypes);
+					m_savedAnimCurves.inTangentAngles.push_back(inTangentAngles);
+					m_savedAnimCurves.outTangentAngles.push_back(outTangentAngles);
+					m_savedAnimCurves.inTangentWeights.push_back(inTangentWeights);
+					m_savedAnimCurves.outTangentWeights.push_back(outTangentWeights);
+				}
+			}
+		}
+	}
+
+	return MS::kSuccess;
 }
 
 int CameraLaunchCmd::calculateFlightFrames()
@@ -485,7 +648,7 @@ int CameraLaunchCmd::calculateFlightFrames()
 	double secondsPerFrame = oneFrame.asUnits(MTime::kSeconds);
 	double fps = 1.0 / secondsPerFrame;
 
-	int flightFrames = (int)(flightTime * fps);
+	int flightFrames = (int)(flightTime * fps) + 1; // Add one to include the frame where it has "hit" the ground
 
 	// Ensure we have at least a few frames
 	return (flightFrames > 0) ? flightFrames : 60;
@@ -502,11 +665,11 @@ std::vector<int> CameraLaunchCmd::getKeyFrameNumbers()
 	MTime::Unit timeUnit = MTime::uiUnit();
 	MTime oneFrame(1.0, timeUnit);
 	double secondsPerFrame = oneFrame.asUnits(MTime::kSeconds);
-	int apexFrame = 1 + (int)(timeToApex / secondsPerFrame);
+	int apexFrame = m_startFrame + (int)(timeToApex / secondsPerFrame);
 	frameNumbers.push_back(apexFrame);
 
 	int totalFrames = calculateFlightFrames();
-	frameNumbers.push_back(1 + totalFrames);
+	frameNumbers.push_back(m_startFrame + totalFrames);
 
 	return frameNumbers;
 }

@@ -19,6 +19,8 @@
 #include <maya/MMatrix.h>
 #include <maya/MFnDependencyNode.h>
 #include <maya/MPlugArray.h>
+#include <maya/MObjectArray.h>
+#include <maya/MAngle.h>
 
 enum class CameraKeyframeType {
 	START,
@@ -61,6 +63,20 @@ private:
 	bool m_hasValidData;
 	MSelectionList m_originalSelection;
 
+	struct AnimCurveData {
+		MObjectArray animCurveObjects;
+		std::vector<MTimeArray> keyTimes;
+		std::vector<MDoubleArray> keyValues;
+		std::vector<std::vector<MFnAnimCurve::TangentType>> inTangentTypes;
+		std::vector<std::vector<MFnAnimCurve::TangentType>> outTangentTypes;
+		std::vector<MDoubleArray> inTangentAngles;
+		std::vector<MDoubleArray> outTangentAngles;
+		std::vector<MDoubleArray> inTangentWeights;
+		std::vector<MDoubleArray> outTangentWeights;
+	};
+
+	AnimCurveData m_savedAnimCurves;
+
 	std::vector<MVector> calculateTrajectory();
 	std::vector<MEulerRotation> calculateRotations(const std::vector<MVector>& points);
 	MStatus setKeyframesOnCamera(const std::vector<MVector>& points, const std::vector<MEulerRotation>& rots);
@@ -73,6 +89,7 @@ private:
 	bool getOrCreateAnimCurve(MPlug& plug, MFnAnimCurve& animCurve, MObject& animCurveObj);
 	MStatus clearExistingAnimationCurves();
 	void clearAnimCurveFromPlug(MPlug& plug);
+	MStatus saveAnimationState();
 	int calculateFlightFrames();
 	std::vector<int> getKeyFrameNumbers();
 
