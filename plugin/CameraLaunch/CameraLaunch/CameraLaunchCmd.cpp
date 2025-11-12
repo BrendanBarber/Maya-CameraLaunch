@@ -8,6 +8,8 @@ const char* CameraLaunchCmd::velocityFlag = "-v";
 const char* CameraLaunchCmd::velocityFlagLong = "-velocity";
 const char* CameraLaunchCmd::gravityFlag = "-g";
 const char* CameraLaunchCmd::gravityFlagLong = "-gravity";
+const char* CameraLaunchCmd::endOffsetFlag = "-o";
+const char* CameraLaunchCmd::endOffsetFlagLong = "-endOffset";
 const char* CameraLaunchCmd::startFrameFlag = "-s";
 const char* CameraLaunchCmd::startFrameLongFlag = "-startFrame";
 
@@ -17,6 +19,7 @@ CameraLaunchCmd::CameraLaunchCmd()
 	CameraLaunchCmd::m_velocity = MVector(0, 0, 0);
 	CameraLaunchCmd::m_gravity = -9.81;
 	CameraLaunchCmd::m_startFrame = 0;
+	CameraLaunchCmd::m_endOffset = 0.0;
 	CameraLaunchCmd::m_hasValidData = false;
 }
 
@@ -36,6 +39,7 @@ MSyntax CameraLaunchCmd::newSyntax()
 	syntax.addFlag(velocityFlag, velocityFlagLong, MSyntax::kDouble, MSyntax::kDouble, MSyntax::kDouble);
 	syntax.addFlag(cameraFlag, cameraFlagLong, MSyntax::kString);
 	syntax.addFlag(gravityFlag, gravityFlagLong, MSyntax::kDouble);
+	syntax.addFlag(endOffsetFlag, endOffsetFlagLong, MSyntax::kDouble);
 	syntax.addFlag(startFrameFlag, startFrameLongFlag, MSyntax::kDouble);
 	return syntax;
 }
@@ -181,6 +185,13 @@ MStatus CameraLaunchCmd::parseArguments(const MArgList& args)
 		m_gravity = gravity;
 	}
 
+	// Exgtract End Offset
+	if (argData.isFlagSet(endOffsetFlag)) {
+		double endOffset = argData.flagArgumentDouble(endOffsetFlag, 0);
+
+		m_endOffset = endOffset;
+	}
+
 	// Extract Start Frame
 	if (argData.isFlagSet(startFrameFlag)) {
 		int startFrame = argData.flagArgumentInt(startFrameFlag, 0);
@@ -259,25 +270,42 @@ std::vector<MVector> CameraLaunchCmd::calculateTrajectory()
 	return keyframes;
 }
 
-std::vector<MEulerRotation> CameraLaunchCmd::calculateRotations(const std::vector<MVector> &points)
+std::vector<MEulerRotation> CameraLaunchCmd::calculateRotations(const std::vector<MVector>& points)
 {
 	std::vector<MEulerRotation> rotKeyframes;
-
-	MVector normalizeVelocity = m_velocity.normal();
-
-	// Set start rotation to be facing the direction of the input velocity
 	const double PI = atan(1.0) * 4;
-	double yaw = std::atan2(normalizeVelocity.x, normalizeVelocity.z) + PI;
-	double pitch = std::asin(normalizeVelocity.y);
 
+	// Calculate time values for each keyframe
+	double timeToApex = -m_velocity.y / m_gravity;
+
+	int totalFrames = calculateFlightFrames();
+	MTime::Unit timeUnit = MTime::uiUnit();
+	MTime oneFrame(1.0, timeUnit);
+	double secondsPerFrame = oneFrame.asUnits(MTime::kSeconds);
+	double totalTime = totalFrames * secondsPerFrame;
+
+	// START
+	MVector startVelocity = m_velocity;
+	MVector normStartVel = startVelocity.normal();
+	double yaw = std::atan2(normStartVel.x, normStartVel.z) + PI;
+	double pitch = std::asin(normStartVel.y);
 	rotKeyframes.push_back(MEulerRotation(pitch, yaw, 0));
 
-	// Set the middle rotation to be a pitch of zero, facing along the trajectory
+	// APEX
+	MVector apexVelocity(m_velocity.x, 0.0, m_velocity.z);
+	MVector normApexVel = apexVelocity.normal();
+	// Pitch should be 0 (horizontal)
 	rotKeyframes.push_back(MEulerRotation(0, yaw, 0));
 
-	// Set the end rotation to be the negation of the input velocity
-	MVector flippedNormalizedVelocity = normalizeVelocity * -1;
-	pitch = std::asin(flippedNormalizedVelocity.y);
+	// END:
+	MVector endVelocity(
+		m_velocity.x,
+		m_velocity.y + m_gravity * totalTime,
+		m_velocity.z
+	);
+	MVector normEndVel = endVelocity.normal();
+	pitch = std::asin(normEndVel.y);
+	// Yaw should still be the same
 	rotKeyframes.push_back(MEulerRotation(pitch, yaw, 0));
 
 	return rotKeyframes;
@@ -633,24 +661,43 @@ MStatus CameraLaunchCmd::saveAnimationState() {
 
 int CameraLaunchCmd::calculateFlightFrames()
 {
-	// Handle case where there's no vertical velocity or gravity is positive
-	if (m_velocity.y <= 0.0 || m_gravity >= 0.0) {
-		// Default to 120 frames
+	// Handle invalid gravity
+	if (m_gravity >= 0.0) {
 		return 120;
 	}
 
-	// Calculate flight time using projectile motion
-	double flightTime = (2.0 * m_velocity.y) / fabs(m_gravity);
+	// Solve quadratic: 0.5*g*t² + v_y*t - m_endOffset = 0
+	double a = 0.5 * m_gravity;
+	double b = m_velocity.y;
+	double c = -m_endOffset;
 
-	// Get the current frame rate
+	double discriminant = b * b - 4.0 * a * c;
+
+	if (discriminant < 0.0) {
+		// No real solution
+		return 120;
+	}
+
+	// Get positive root (after apex)
+	double sqrtDisc = sqrt(discriminant);
+	double t1 = (-b - sqrtDisc) / (2.0 * a);
+	double t2 = (-b + sqrtDisc) / (2.0 * a);
+
+	// Take the larger positive time (the landing time)
+	double flightTime = (t2 > t1) ? t2 : t1;
+
+	if (flightTime <= 0.0) {
+		return 120;
+	}
+
+	// Convert to frames
 	MTime::Unit timeUnit = MTime::uiUnit();
 	MTime oneFrame(1.0, timeUnit);
 	double secondsPerFrame = oneFrame.asUnits(MTime::kSeconds);
 	double fps = 1.0 / secondsPerFrame;
 
-	int flightFrames = (int)(flightTime * fps) + 1; // Add one to include the frame where it has "hit" the ground
+	int flightFrames = (int)(flightTime * fps) + 1;
 
-	// Ensure we have at least a few frames
 	return (flightFrames > 0) ? flightFrames : 60;
 }
 

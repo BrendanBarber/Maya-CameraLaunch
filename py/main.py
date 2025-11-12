@@ -82,6 +82,16 @@ class SimpleButtonUI(QtWidgets.QDialog):
         gravity_layout.addWidget(self.gravity_spin)
         main_layout.addLayout(gravity_layout)
 
+        # End Offset
+        offset_layout = QtWidgets.QHBoxLayout()
+        offset_label = QtWidgets.QLabel("End Offset:")
+        self.offset_spin = QtWidgets.QDoubleSpinBox()
+        self.offset_spin.setRange(-100000,100000)
+        self.offset_spin.setValue(0.0)
+        offset_layout.addWidget(offset_label)
+        offset_layout.addWidget(self.offset_spin)
+        main_layout.addLayout(offset_layout)
+
         # Start Frame
         frame_layout = QtWidgets.QHBoxLayout()
         frame_label = QtWidgets.QLabel("Start Frame:")
@@ -126,6 +136,7 @@ class SimpleButtonUI(QtWidgets.QDialog):
             self.vel_z_spin.value()
         )
         gravity = self.gravity_spin.value()
+        end_offset = self.offset_spin.value()
         start_frame = self.frame_spin.value()
 
         try:
@@ -133,11 +144,12 @@ class SimpleButtonUI(QtWidgets.QDialog):
                 camera=camera,
                 velocity=velocity,
                 gravity=gravity,
+                endOffset=end_offset,
                 startFrame=start_frame
             )
             print(f"Camera launched: {camera} with velocity {velocity}")
         except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Error", f'Failed to launch camera: {str(e)}')
+            QtWidgets.QMessageBox.critical(self, "Error", f"Failed to launch camera:\\n{str(e)}")
 
 
 def show_ui():

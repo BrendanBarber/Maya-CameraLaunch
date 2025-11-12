@@ -52,12 +52,15 @@ private:
 	static const char* velocityFlagLong;
 	static const char* gravityFlag;
 	static const char* gravityFlagLong;
+	static const char* endOffsetFlag;
+	static const char* endOffsetFlagLong;
 	static const char* startFrameFlag;
 	static const char* startFrameLongFlag;
 
 	MDagPath m_cameraPath;
 	MVector m_velocity;
 	double m_gravity;
+	double m_endOffset;
 	int m_startFrame;
 
 	bool m_hasValidData;
