@@ -32,7 +32,7 @@
               "RelativeDocumentMoniker": "CameraLaunch\\CameraLaunchCmd.cpp",
               "ToolTip": "C:\\Users\\brend\\Desktop\\Art\\TDSummer\\MayaProjects\\CameraLaunch\\plugin\\CameraLaunch\\CameraLaunch\\CameraLaunchCmd.cpp",
               "RelativeToolTip": "CameraLaunch\\CameraLaunchCmd.cpp",
-              "ViewState": "AgIAACkBAAAAAAAAAAAmwBUBAAArAAAAAAAAAA==",
+              "ViewState": "AgIAAKoCAAAAAAAAAAAswJYCAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-09-02T01:54:00.253Z",
               "EditorCaption": ""
@@ -47,8 +47,7 @@
               "RelativeToolTip": "CameraLaunch\\CameraLaunchCmd.h",
               "ViewState": "AgIAAEgAAAAAAAAAAAAqwD4AAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-09-02T01:39:06.002Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-02T01:39:06.002Z"
             },
             {
               "$type": "Document",
@@ -60,8 +59,7 @@
               "RelativeToolTip": "CameraLaunch\\pluginMain.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-08-30T06:19:14.943Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-30T06:19:14.943Z"
             }
           ]
         }

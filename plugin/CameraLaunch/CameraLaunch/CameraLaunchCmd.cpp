@@ -245,7 +245,8 @@ std::vector<MVector> CameraLaunchCmd::calculateTrajectory()
 {
 	std::vector<MVector> keyframes;
 
-	MVector startPos = m_cameraPath.inclusiveMatrix() * MPoint::origin;
+	MTransformationMatrix transform(m_cameraPath.inclusiveMatrix());
+	MVector startPos = transform.getTranslation(MSpace::kWorld);
 	keyframes.push_back(startPos);
 
 	double timeToApex = -m_velocity.y / m_gravity;
